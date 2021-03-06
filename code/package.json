@@ -1,0 +1,14 @@
+{
+  "name": "aws-serverless-blogs",
+  "version": "1.0.0",
+  "description": "AWS Serverless blogs MS Teams notifier",
+  "main": "app.js",
+  "author": "DLozitskiy",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "latest",
+    "request": "latest",
+    "xml2js": "latest",
+    "xml2json": "latest"
+  }
+}

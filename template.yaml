@@ -1,0 +1,58 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: AWS Serverless Blogs MS Teams Publisher
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  RSSFeed:
+    Type: String
+    Description: 'RSS feed to scan'
+    Default: 'https://aws.amazon.com/blogs/compute/feed'
+  WebhookUrl:
+    Type: String
+    Description: 'Webhook Url'
+Globals:
+  Function:
+    Environment:
+      Variables:
+        DDB_ENDPOINT_OVERRIDE: ""
+        WebhookUrl: !Ref WebhookUrl
+        table: !Ref BlogsTable
+        feedUrl: !Ref RSSFeed
+Resources:
+
+  AWSServerlessBlogs:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: code/
+      Handler: app.handler
+      Runtime: nodejs12.x
+      MemorySize: 1024
+      Timeout: 120
+      Description: A Lambda function to publish to MS Teams
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - DynamoDBReadPolicy:
+            TableName: 
+              !Ref BlogsTable
+        - DynamoDBWritePolicy:
+            TableName:
+              !Ref BlogsTable
+      Events:
+        Schedule:
+          Type: Schedule
+          Properties:
+            Schedule: 'rate(1 hour)'
+            Name: Schedule
+            Description: Hourly schedule
+            Enabled: True        
+
+  BlogsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: "id"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "id"
+          KeyType: "HASH"
+      BillingMode: "PAY_PER_REQUEST"
